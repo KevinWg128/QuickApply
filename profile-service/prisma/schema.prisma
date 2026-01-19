@@ -1,0 +1,115 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Profile {
+  id             String   @id @default(uuid())
+  name           String
+  email          String
+  personalSiteUrl String? @map("personal_site_url")
+  linkedinUrl    String?  @map("linkedin_url")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  workExperiences WorkExperience[]
+  educations      Education[]
+  skills          Skill[]
+  projects        Project[]
+  certifications  Certification[]
+
+  @@map("profiles")
+}
+
+model WorkExperience {
+  id          String    @id @default(uuid())
+  profileId   String    @map("profile_id")
+  company     String
+  title       String
+  location    String?
+  startDate   DateTime  @map("start_date")
+  endDate     DateTime? @map("end_date")
+  description String?   @db.Text
+  isCurrent   Boolean   @default(false) @map("is_current")
+  orderIndex  Int       @default(0) @map("order_index")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@map("work_experiences")
+}
+
+model Education {
+  id           String    @id @default(uuid())
+  profileId    String    @map("profile_id")
+  institution  String
+  degree       String
+  fieldOfStudy String?   @map("field_of_study")
+  startDate    DateTime  @map("start_date")
+  endDate      DateTime? @map("end_date")
+  gpa          Float?
+  description  String?   @db.Text
+  orderIndex   Int       @default(0) @map("order_index")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@map("educations")
+}
+
+model Skill {
+  id          String   @id @default(uuid())
+  profileId   String   @map("profile_id")
+  name        String
+  category    String?
+  proficiency String?
+  orderIndex  Int      @default(0) @map("order_index")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@map("skills")
+}
+
+model Project {
+  id          String    @id @default(uuid())
+  profileId   String    @map("profile_id")
+  name        String
+  description String?   @db.Text
+  url         String?
+  startDate   DateTime? @map("start_date")
+  endDate     DateTime? @map("end_date")
+  type        String    @default("project") // "project" or "award"
+  orderIndex  Int       @default(0) @map("order_index")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@map("projects")
+}
+
+model Certification {
+  id            String    @id @default(uuid())
+  profileId     String    @map("profile_id")
+  name          String
+  issuer        String
+  issueDate     DateTime  @map("issue_date")
+  expiryDate    DateTime? @map("expiry_date")
+  credentialId  String?   @map("credential_id")
+  credentialUrl String?   @map("credential_url")
+  orderIndex    Int       @default(0) @map("order_index")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@map("certifications")
+}

@@ -1,0 +1,48 @@
+services:
+  postgres:
+    image: postgres:latest
+    container_name: quickapply-postgres
+    environment:
+      POSTGRES_USER: quickapply
+      POSTGRES_PASSWORD: quickapply_dev
+      POSTGRES_DB: quickapply
+    ports:
+      - "54323:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U quickapply"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - quickapply-network
+
+  profile-service:
+    build:
+      context: ./profile-service
+      dockerfile: Dockerfile
+      target: development
+    container_name: quickapply-profile-service
+    environment:
+      DATABASE_URL: postgresql://quickapply:quickapply_dev@postgres:5432/quickapply?schema=public
+      NODE_ENV: development
+      PORT: 3001
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./profile-service:/app
+      - /app/node_modules
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - quickapply-network
+    command: pnpm run dev
+
+volumes:
+  postgres_data:
+
+networks:
+  quickapply-network:
+    driver: bridge
