@@ -25,6 +25,7 @@ export function ProfileForm({ profile, onSubmit }: ProfileFormProps) {
     const [formData, setFormData] = useState<ProfileInput>({
         name: profile?.name || '',
         email: profile?.email || '',
+        phone: profile?.phone || '',
         personalSiteUrl: profile?.personalSiteUrl || '',
         linkedinUrl: profile?.linkedinUrl || '',
     });
@@ -96,6 +97,17 @@ export function ProfileForm({ profile, onSubmit }: ProfileFormProps) {
                                 onChange={handleChange}
                                 placeholder="john@example.com"
                                 required
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="phone">Phone Number</Label>
+                            <Input
+                                id="phone"
+                                name="phone"
+                                type="tel"
+                                value={formData.phone || ''}
+                                onChange={handleChange}
+                                placeholder="+1 (555) 123-4567"
                             />
                         </div>
                     </div>

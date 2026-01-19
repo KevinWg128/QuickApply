@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ProfileForm } from './ProfileForm';
 import type { Profile, ProfileInput } from '@/lib/types';
-import { Mail, Globe, Linkedin, User } from 'lucide-react';
+import { Mail, Globe, Linkedin, User, Phone } from 'lucide-react';
 
 interface ProfileCardProps {
     profile: Profile | null;
@@ -45,6 +45,12 @@ export function ProfileCard({ profile, onUpdate }: ProfileCardProps) {
                             <Mail className="h-4 w-4" />
                             {profile.email}
                         </div>
+                        {profile.phone && (
+                            <div className="mt-1 flex items-center gap-2 text-sm text-muted-foreground">
+                                <Phone className="h-4 w-4" />
+                                {profile.phone}
+                            </div>
+                        )}
                     </div>
                 </div>
                 <ProfileForm profile={profile} onSubmit={onUpdate} />
