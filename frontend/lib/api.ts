@@ -14,6 +14,7 @@ import type {
 } from './types';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+const RESUME_API_URL = process.env.NEXT_PUBLIC_RESUME_API_URL || 'http://localhost:3004';
 
 // Generic fetch wrapper with error handling
 async function fetchApi<T>(
@@ -37,6 +38,26 @@ async function fetchApi<T>(
     // Handle 204 No Content
     if (response.status === 204) {
         return undefined as T;
+    }
+
+    return response.json();
+}
+
+// Fetch wrapper for file uploads (FormData)
+async function fetchFileApi<T>(
+    endpoint: string,
+    formData: FormData
+): Promise<T> {
+    const url = `${RESUME_API_URL}${endpoint}`;
+    const response = await fetch(url, {
+        method: 'POST',
+        body: formData,
+        // Content-Type header is explicitly NOT set to let browser set it with boundary
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || errorData.message || `API Error: ${response.status}`);
     }
 
     return response.json();
@@ -176,4 +197,13 @@ export const certificationsApi = {
 
     delete: (id: string) =>
         fetchApi<void>(`/certifications/${id}`, { method: 'DELETE' }),
+};
+
+// ============ Resume API ============
+export const resumeApi = {
+    upload: (file: File) => {
+        const formData = new FormData();
+        formData.append('resume', file);
+        return fetchFileApi<{ message: string; data: any }>('/api/resume/upload', formData);
+    },
 };

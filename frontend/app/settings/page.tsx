@@ -37,21 +37,26 @@ export default function SettingsPage() {
     }, []);
 
     const handleSave = async () => {
-        if (!profile) return;
-
         setSaving(true);
         try {
-            const updatedProfile = await profileApi.update({
-                // We only want to update the API key here, but the API expects partial ProfileInput
-                // Since the update method takes Partial<ProfileInput>, we can just pass the key if the backend supports it.
-                // However, ProfileInput definition requires name, email etc. if we were creating, but for update it's Partial.
-                // Let's verify types.ts again. Yes, update takes Partial<ProfileInput>.
-                geminiApiKey: geminiApiKey,
-            });
+            let updatedProfile;
+            if (profile) {
+                // Update existing profile
+                updatedProfile = await profileApi.update({
+                    geminiApiKey: geminiApiKey,
+                });
+            } else {
+                // Create new profile with placeholder values - API key is what matters here
+                updatedProfile = await profileApi.create({
+                    name: 'New User',
+                    email: 'user@example.com',
+                    geminiApiKey: geminiApiKey,
+                });
+            }
             setProfile(updatedProfile);
             // Optional: Show success message/toast
         } catch (error) {
-            console.error('Failed to update settings:', error);
+            console.error('Failed to save settings:', error);
         } finally {
             setSaving(false);
         }

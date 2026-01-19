@@ -43,7 +43,7 @@ router.post('/upload', upload.single('resume'), async (req, res) => {
             // or I check req.body.geminiApiKey?
 
             // Let's check headers or body just in case, but prefer profile.
-            res.status(404).json({ error: 'Profile not found. Please create a profile with Gemini API Key first.' });
+            res.status(400).json({ error: 'Profile not found. Please create a profile with Gemini API Key first.' });
             return;
         }
 
@@ -53,8 +53,8 @@ router.post('/upload', upload.single('resume'), async (req, res) => {
             return;
         }
 
-        // 2. Parse Resume
-        const parsedData = await parseResume(req.file.path, req.file.mimetype, apiKey);
+        // 2. Parse Resume (pass original filename for MIME type detection fallback)
+        const parsedData = await parseResume(req.file.path, req.file.mimetype, apiKey, req.file.originalname);
         console.log('Resume parsed successfully.');
 
         // 3. Update Profile

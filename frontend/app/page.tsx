@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { ApiKeyDialog } from '@/components/settings/ApiKeyDialog';
+import { ResumeUploadDialog } from '@/components/resume/ResumeUploadDialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { ProfileCard } from '@/components/profile/ProfileCard';
@@ -45,6 +46,7 @@ import {
   Loader2,
   Zap,
   Settings,
+  FileText,
 } from 'lucide-react';
 
 export default function Dashboard() {
@@ -56,6 +58,7 @@ export default function Dashboard() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [certifications, setCertifications] = useState<Certification[]>([]);
   const [showApiKeyDialog, setShowApiKeyDialog] = useState(false);
+  const [showResumeUploadDialog, setShowResumeUploadDialog] = useState(false);
 
   // Fetch all data on mount
   const fetchData = useCallback(async () => {
@@ -203,13 +206,29 @@ export default function Dashboard() {
               <p className="text-xs text-muted-foreground">Resume Manager</p>
             </div>
           </div>
-          <Button variant="ghost" size="icon" asChild>
-            <Link href="/settings">
-              <Settings className="h-5 w-5" />
-            </Link>
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setShowResumeUploadDialog(true)}
+              title="Upload Resume"
+            >
+              <FileText className="h-5 w-5" />
+            </Button>
+            <Button variant="ghost" size="icon" asChild>
+              <Link href="/settings">
+                <Settings className="h-5 w-5" />
+              </Link>
+            </Button>
+          </div>
         </div>
       </header>
+
+      <ResumeUploadDialog
+        open={showResumeUploadDialog}
+        onOpenChange={setShowResumeUploadDialog}
+        onSuccess={fetchData}
+      />
 
       {/* Main Content */}
       <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6">

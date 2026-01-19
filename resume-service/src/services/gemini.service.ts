@@ -1,30 +1,80 @@
 
 import { GoogleGenAI } from '@google/genai';
 import fs from 'fs';
+import path from 'path';
 // @ts-ignore
 import { ResumeData } from './profile.service.js';
 
-const MODEL_NAME = 'gemini-1.5-flash'; // Or 'gemini-1.5-pro'
+const MODEL_NAME = 'gemini-2.5-flash'; // Or 'gemini-1.5-pro'
 
-export async function parseResume(filePath: string, mimeType: string, apiKey: string): Promise<ResumeData> {
+// Helper function to get MIME type from file extension
+function getMimeTypeFromExtension(filename: string): string | null {
+    const ext = path.extname(filename).toLowerCase();
+    const mimeMap: Record<string, string> = {
+        '.pdf': 'application/pdf',
+        '.docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        '.doc': 'application/msword',
+        '.txt': 'text/plain',
+        '.md': 'text/markdown',
+        '.rtf': 'application/rtf',
+    };
+    return mimeMap[ext] || null;
+}
+
+// Helper function to get file extension from MIME type
+function getExtensionFromMimeType(mimeType: string): string {
+    const extMap: Record<string, string> = {
+        'application/pdf': '.pdf',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document': '.docx',
+        'application/msword': '.doc',
+        'text/plain': '.txt',
+        'text/markdown': '.md',
+        'application/rtf': '.rtf',
+    };
+    return extMap[mimeType] || '.bin';
+}
+
+export async function parseResume(filePath: string, mimeType: string, apiKey: string, originalFilename?: string): Promise<ResumeData> {
     const client = new GoogleGenAI({ apiKey });
 
-    // 0. Rename file to have extension (Gemini relies on extension for Mime type if not provided)
-    const extension = mimeType.split('/')[1]; // very rough, but works for pdf/json/etc.
-    // Better mapping:
-    let ext = '.bin';
-    if (mimeType === 'application/pdf') ext = '.pdf';
-    else if (mimeType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') ext = '.docx';
-    else if (mimeType === 'text/plain') ext = '.txt';
-    else if (mimeType === 'text/markdown') ext = '.md';
+    // Determine the correct MIME type
+    let resolvedMimeType = mimeType;
 
+    // If MIME type is application/octet-stream (generic), try to detect from file extension
+    if (mimeType === 'application/octet-stream' && originalFilename) {
+        const detectedMime = getMimeTypeFromExtension(originalFilename);
+        if (detectedMime) {
+            resolvedMimeType = detectedMime;
+            console.log(`Detected MIME type from filename: ${resolvedMimeType}`);
+        }
+    }
+
+    // Validate that we have a supported MIME type
+    const supportedMimeTypes = [
+        'application/pdf',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'application/msword',
+        'text/plain',
+        'text/markdown',
+        'application/rtf',
+    ];
+
+    if (!supportedMimeTypes.includes(resolvedMimeType)) {
+        throw new Error(`Unsupported file type: ${resolvedMimeType}. Supported types are: PDF, DOCX, DOC, TXT, MD, RTF`);
+    }
+
+    // Rename file to have correct extension (Gemini relies on extension for MIME type detection)
+    const ext = getExtensionFromMimeType(resolvedMimeType);
     const newPath = filePath + ext;
     fs.renameSync(filePath, newPath);
 
     try {
-        // 1. Upload file
-        console.log(`Uploading file to Gemini: ${newPath}`);
-        const uploadResult = await client.files.upload({ file: newPath });
+        // 1. Upload file with explicit MIME type
+        console.log(`Uploading file to Gemini: ${newPath} (MIME: ${resolvedMimeType})`);
+        const uploadResult = await client.files.upload({
+            file: newPath,
+            config: { mimeType: resolvedMimeType }
+        });
         console.log(`File uploaded: ${uploadResult.uri}`);
 
         // 2. Generate content
