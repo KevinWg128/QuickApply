@@ -40,6 +40,27 @@ services:
       - quickapply-network
     command: pnpm run dev
 
+  resume-service:
+    build:
+      context: ./resume-service
+      dockerfile: Dockerfile
+      target: development
+    container_name: quickapply-resume-service
+    environment:
+      NODE_ENV: development
+      PORT: 3004
+      PROFILE_SERVICE_URL: http://profile-service:3001
+    ports:
+      - "3004:3004"
+    volumes:
+      - ./resume-service:/app
+      - /app/node_modules
+    depends_on:
+      - profile-service
+    networks:
+      - quickapply-network
+    command: pnpm run dev
+
 volumes:
   postgres_data:
 

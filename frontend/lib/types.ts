@@ -4,6 +4,7 @@ export interface Profile {
     name: string;
     email: string;
     phone?: string | null;
+    geminiApiKey?: string | null;
     personalSiteUrl?: string | null;
     linkedinUrl?: string | null;
     createdAt: string;
@@ -19,6 +20,7 @@ export interface ProfileInput {
     name: string;
     email: string;
     phone?: string | null;
+    geminiApiKey?: string | null;
     personalSiteUrl?: string | null;
     linkedinUrl?: string | null;
 }

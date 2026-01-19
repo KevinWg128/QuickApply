@@ -1,0 +1,26 @@
+{
+    "name": "resume-service",
+    "version": "1.0.0",
+    "description": "Resume parsing service using Gemini",
+    "main": "src/index.ts",
+    "scripts": {
+        "dev": "tsx watch src/index.ts",
+        "build": "tsc",
+        "start": "node dist/index.js"
+    },
+    "dependencies": {
+        "@google/genai": "^1.37.0",
+        "axios": "^1.13.2",
+        "cors": "^2.8.5",
+        "express": "^4.22.1",
+        "multer": "^2.0.2"
+    },
+    "devDependencies": {
+        "@types/cors": "^2.8.17",
+        "@types/express": "^5.0.0",
+        "@types/multer": "^1.4.11",
+        "@types/node": "^22.10.7",
+        "tsx": "^4.19.2",
+        "typescript": "^5.7.3"
+    }
+}

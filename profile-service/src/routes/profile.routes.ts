@@ -21,7 +21,7 @@ router.get('/', async (req, res) => {
 
 // Create or update profile (upsert - single profile mode)
 router.post('/', async (req, res) => {
-    const { name, email, phone, personalSiteUrl, linkedinUrl } = req.body;
+    const { name, email, phone, geminiApiKey, personalSiteUrl, linkedinUrl } = req.body;
 
     if (!name || !email) {
         throw new AppError('Name and email are required', 400);
@@ -35,12 +35,12 @@ router.post('/', async (req, res) => {
         // Update existing profile
         profile = await prisma.profile.update({
             where: { id: existingProfile.id },
-            data: { name, email, phone, personalSiteUrl, linkedinUrl },
+            data: { name, email, phone, geminiApiKey, personalSiteUrl, linkedinUrl },
         });
     } else {
         // Create new profile
         profile = await prisma.profile.create({
-            data: { name, email, phone, personalSiteUrl, linkedinUrl },
+            data: { name, email, phone, geminiApiKey, personalSiteUrl, linkedinUrl },
         });
     }
 
@@ -49,7 +49,7 @@ router.post('/', async (req, res) => {
 
 // Update profile
 router.put('/', async (req, res) => {
-    const { name, email, phone, personalSiteUrl, linkedinUrl } = req.body;
+    const { name, email, phone, geminiApiKey, personalSiteUrl, linkedinUrl } = req.body;
 
     const existingProfile = await prisma.profile.findFirst();
     if (!existingProfile) {
@@ -58,7 +58,7 @@ router.put('/', async (req, res) => {
 
     const profile = await prisma.profile.update({
         where: { id: existingProfile.id },
-        data: { name, email, phone, personalSiteUrl, linkedinUrl },
+        data: { name, email, phone, geminiApiKey, personalSiteUrl, linkedinUrl },
     });
 
     res.json(profile);

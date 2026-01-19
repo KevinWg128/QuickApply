@@ -1,7 +1,10 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import Link from 'next/link';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button';
+import { ApiKeyDialog } from '@/components/settings/ApiKeyDialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { ProfileCard } from '@/components/profile/ProfileCard';
@@ -41,6 +44,7 @@ import {
   Award,
   Loader2,
   Zap,
+  Settings,
 } from 'lucide-react';
 
 export default function Dashboard() {
@@ -51,6 +55,7 @@ export default function Dashboard() {
   const [skills, setSkills] = useState<Skill[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
   const [certifications, setCertifications] = useState<Certification[]>([]);
+  const [showApiKeyDialog, setShowApiKeyDialog] = useState(false);
 
   // Fetch all data on mount
   const fetchData = useCallback(async () => {
@@ -82,6 +87,13 @@ export default function Dashboard() {
   useEffect(() => {
     fetchData();
   }, [fetchData]);
+
+  // Check for API key after profile is loaded
+  useEffect(() => {
+    if (!loading && profile && !profile.geminiApiKey) {
+      setShowApiKeyDialog(true);
+    }
+  }, [loading, profile]);
 
   // Profile handlers
   const handleProfileUpdate = async (data: ProfileInput) => {
@@ -191,11 +203,23 @@ export default function Dashboard() {
               <p className="text-xs text-muted-foreground">Resume Manager</p>
             </div>
           </div>
+          <Button variant="ghost" size="icon" asChild>
+            <Link href="/settings">
+              <Settings className="h-5 w-5" />
+            </Link>
+          </Button>
         </div>
       </header>
 
       {/* Main Content */}
       <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
+        <ApiKeyDialog
+          open={showApiKeyDialog}
+          onOpenChange={setShowApiKeyDialog}
+          onSuccess={() => {
+            fetchData(); // Refresh profile to get the new key
+          }}
+        />
         {/* Profile Section */}
         <section className="mb-8">
           <ProfileCard profile={profile} onUpdate={handleProfileUpdate} />
