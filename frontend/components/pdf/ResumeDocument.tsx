@@ -221,6 +221,12 @@ function formatDate(dateStr: string | null | undefined): string {
     return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
 }
 
+// Helper to format URLs for display (strip protocol)
+function formatUrl(url: string | null | undefined): string {
+    if (!url) return '';
+    return url.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '');
+}
+
 export function ResumeDocument({
     profile,
     jobTitle,
