@@ -1,0 +1,30 @@
+{
+    "name": "job-service",
+    "version": "1.0.0",
+    "description": "Job application tracking service for QuickApply",
+    "main": "dist/index.js",
+    "scripts": {
+        "dev": "pnpm prisma migrate deploy && tsx watch src/index.ts",
+        "build": "tsc",
+        "start": "pnpm prisma migrate deploy && node dist/index.js",
+        "prisma:generate": "prisma generate",
+        "prisma:migrate": "prisma migrate dev",
+        "prisma:studio": "prisma studio"
+    },
+    "dependencies": {
+        "@prisma/client": "^6.2.1",
+        "cors": "^2.8.5",
+        "express": "^4.21.2",
+        "express-async-errors": "^3.1.1",
+        "uuid": "^11.0.5"
+    },
+    "devDependencies": {
+        "@types/cors": "^2.8.17",
+        "@types/express": "^5.0.0",
+        "@types/node": "^22.10.7",
+        "@types/uuid": "^10.0.0",
+        "prisma": "^6.2.1",
+        "tsx": "^4.19.2",
+        "typescript": "^5.7.3"
+    }
+}

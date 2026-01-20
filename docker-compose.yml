@@ -61,6 +61,28 @@ services:
       - quickapply-network
     command: pnpm run dev
 
+  job-service:
+    build:
+      context: ./job-service
+      dockerfile: Dockerfile
+      target: development
+    container_name: quickapply-job-service
+    environment:
+      DATABASE_URL: postgresql://quickapply:quickapply_dev@postgres:5432/quickapply?schema=job
+      NODE_ENV: development
+      PORT: 3005
+    ports:
+      - "3005:3005"
+    volumes:
+      - ./job-service:/app
+      - /app/node_modules
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - quickapply-network
+    command: pnpm run dev
+
 volumes:
   postgres_data:
 

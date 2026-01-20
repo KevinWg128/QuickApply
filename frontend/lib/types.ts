@@ -147,3 +147,38 @@ export interface CertificationInput {
     credentialUrl?: string | null;
     orderIndex?: number;
 }
+
+// Job Application types
+export type ApplicationStatus = 'APPLIED' | 'INTERVIEW' | 'REJECTED' | 'OFFER' | 'WITHDRAWN';
+
+export interface JobApplication {
+    id: string;
+    jobUrl?: string | null;
+    jobTitle: string;
+    company: string;
+    jobDescription?: string | null;
+    notes?: string | null;
+    status: ApplicationStatus;
+    appliedAt: string;
+    createdAt: string;
+    updatedAt: string;
+}
+
+export interface JobApplicationInput {
+    jobUrl?: string | null;
+    jobTitle: string;
+    company: string;
+    jobDescription?: string | null;
+    notes?: string | null;
+    appliedAt?: string;
+}
+
+export interface PaginatedResponse<T> {
+    data: T[];
+    pagination: {
+        page: number;
+        limit: number;
+        total: number;
+        totalPages: number;
+    };
+}

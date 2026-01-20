@@ -207,3 +207,60 @@ export const resumeApi = {
         return fetchFileApi<{ message: string; data: any }>('/api/resume/upload', formData);
     },
 };
+
+// ============ Job Application API ============
+import type {
+    JobApplication,
+    JobApplicationInput,
+    ApplicationStatus,
+    PaginatedResponse,
+} from './types';
+
+const JOB_API_URL = process.env.NEXT_PUBLIC_JOB_API_URL || 'http://localhost:3005';
+
+async function fetchJobApi<T>(
+    endpoint: string,
+    options?: RequestInit
+): Promise<T> {
+    const url = `${JOB_API_URL}${endpoint}`;
+    const response = await fetch(url, {
+        ...options,
+        headers: {
+            'Content-Type': 'application/json',
+            ...options?.headers,
+        },
+    });
+
+    if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        throw new Error(error.message || `API Error: ${response.status}`);
+    }
+
+    if (response.status === 204) {
+        return undefined as T;
+    }
+
+    return response.json();
+}
+
+export const jobApplicationApi = {
+    getAll: (page: number = 1, limit: number = 20) =>
+        fetchJobApi<PaginatedResponse<JobApplication>>(`/job-applications?page=${page}&limit=${limit}`),
+
+    getById: (id: string) => fetchJobApi<JobApplication>(`/job-applications/${id}`),
+
+    create: (data: JobApplicationInput) =>
+        fetchJobApi<JobApplication>('/job-applications', {
+            method: 'POST',
+            body: JSON.stringify(data),
+        }),
+
+    update: (id: string, data: Partial<JobApplicationInput> & { status?: ApplicationStatus }) =>
+        fetchJobApi<JobApplication>(`/job-applications/${id}`, {
+            method: 'PUT',
+            body: JSON.stringify(data),
+        }),
+
+    delete: (id: string) =>
+        fetchJobApi<void>(`/job-applications/${id}`, { method: 'DELETE' }),
+};
