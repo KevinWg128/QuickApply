@@ -18,6 +18,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
 import { JobApplicationDialog } from './JobApplicationDialog';
+import { TailoredResumeDialog } from '@/components/tailor/TailoredResumeDialog';
 import {
     ExternalLink,
     MoreHorizontal,
@@ -26,6 +27,7 @@ import {
     Calendar,
     Building2,
     Briefcase,
+    FileText,
 } from 'lucide-react';
 import type { JobApplication, JobApplicationInput, ApplicationStatus } from '@/lib/types';
 
@@ -112,6 +114,14 @@ export function JobApplicationCard({
                                 ))}
                             </SelectContent>
                         </Select>
+                        <TailoredResumeDialog
+                            application={application}
+                            trigger={
+                                <Button variant="outline" size="icon" title="Tailor Resume">
+                                    <FileText className="h-4 w-4" />
+                                </Button>
+                            }
+                        />
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <Button variant="ghost" size="icon">

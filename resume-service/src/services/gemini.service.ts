@@ -190,3 +190,173 @@ export async function parseResume(filePath: string, mimeType: string, apiKey: st
     }
 }
 
+
+// Interface for job application data
+interface JobApplication {
+    id: string;
+    jobUrl?: string | null;
+    jobTitle: string;
+    company: string;
+    jobDescription?: string | null;
+    notes?: string | null;
+    status: string;
+    appliedAt: string;
+}
+
+// Interface for profile data
+interface Profile {
+    id: string;
+    name: string;
+    email: string;
+    phone?: string | null;
+    personalSiteUrl?: string | null;
+    linkedinUrl?: string | null;
+    workExperiences?: Array<{
+        company: string;
+        title: string;
+        location?: string | null;
+        startDate: string;
+        endDate?: string | null;
+        description?: string | null;
+        isCurrent: boolean;
+    }>;
+    educations?: Array<{
+        institution: string;
+        degree: string;
+        fieldOfStudy?: string | null;
+        startDate: string;
+        endDate?: string | null;
+    }>;
+    skills?: Array<{
+        name: string;
+        category?: string | null;
+    }>;
+    projects?: Array<{
+        name: string;
+        description?: string | null;
+        url?: string | null;
+        startDate?: string | null;
+        endDate?: string | null;
+        type: string;
+    }>;
+    certifications?: Array<{
+        name: string;
+        issuer: string;
+        issueDate: string;
+    }>;
+}
+
+// Interface for tailored content response
+export interface TailoredContent {
+    summaryBullets: string[];     // 5 tailored bullet points
+    keySkills: string[];          // 3 key skills for title bar
+    relevantSkills: string[];     // Up to 9 relevant skills
+    coverLetterBody: string;      // Generated cover letter content
+}
+
+export async function generateTailoredContent(
+    jobApplication: JobApplication,
+    profile: Profile,
+    apiKey: string
+): Promise<TailoredContent> {
+    const client = new GoogleGenAI({ apiKey });
+
+    // Build profile summary for Gemini
+    const workExperienceSummary = profile.workExperiences?.map(exp =>
+        `- ${exp.title} at ${exp.company}${exp.location ? ` (${exp.location})` : ''}: ${exp.description || 'No description'}`
+    ).join('\n') || 'No work experience listed';
+
+    const skillsList = profile.skills?.map(s => s.name).join(', ') || 'No skills listed';
+
+    const projectsSummary = profile.projects?.map(p =>
+        `- ${p.name}: ${p.description || 'No description'}`
+    ).join('\n') || 'No projects listed';
+
+    const prompt = `
+You are a professional resume consultant. Analyze the job posting and candidate's profile to generate tailored resume content.
+
+## Job Posting
+**Title:** ${jobApplication.jobTitle}
+**Company:** ${jobApplication.company}
+**Description:**
+${jobApplication.jobDescription || 'No job description provided'}
+
+## Candidate Profile
+**Name:** ${profile.name}
+
+**Work Experience:**
+${workExperienceSummary}
+
+**Skills:** ${skillsList}
+
+**Projects:**
+${projectsSummary}
+
+## Instructions
+Generate the following content tailored to this specific job:
+
+1. **summaryBullets**: Exactly 5 achievement-focused bullet points for the resume summary section. Each bullet should:
+   - Start with a strong action verb
+   - Include quantifiable results where possible
+   - Be relevant to the job requirements
+   - Highlight the candidate's most impressive achievements that align with the role
+
+2. **keySkills**: Exactly 3 of the most important skills for this role (to display prominently under the job title)
+
+3. **relevantSkills**: Up to 9 skills from the candidate's profile that are most relevant to this job posting
+
+4. **coverLetterBody**: A professional cover letter body (3-4 paragraphs) that:
+   - Opens with enthusiasm for the specific role and company
+   - Highlights 2-3 key achievements relevant to this role
+   - Explains why the candidate is a great fit
+   - Closes with a call to action
+
+Return ONLY valid JSON matching this schema (no markdown, no code blocks):
+{
+  "summaryBullets": ["string", "string", "string", "string", "string"],
+  "keySkills": ["string", "string", "string"],
+  "relevantSkills": ["string", ...],
+  "coverLetterBody": "string"
+}
+`;
+
+    console.log('Generating tailored content with Gemini...');
+
+    const response = await client.models.generateContent({
+        model: MODEL_NAME,
+        contents: [{ role: 'user', parts: [{ text: prompt }] }],
+        config: {
+            responseMimeType: 'application/json',
+        }
+    });
+
+    const responseText = response.text;
+    console.log('Gemini response received.');
+
+    if (!responseText) {
+        throw new Error('Empty response from Gemini');
+    }
+
+    try {
+        const data = JSON.parse(responseText) as TailoredContent;
+
+        // Validate the response structure
+        if (!Array.isArray(data.summaryBullets) || data.summaryBullets.length !== 5) {
+            throw new Error('Invalid summaryBullets: expected exactly 5 items');
+        }
+        if (!Array.isArray(data.keySkills) || data.keySkills.length !== 3) {
+            throw new Error('Invalid keySkills: expected exactly 3 items');
+        }
+        if (!Array.isArray(data.relevantSkills) || data.relevantSkills.length === 0) {
+            throw new Error('Invalid relevantSkills: expected at least 1 item');
+        }
+        if (typeof data.coverLetterBody !== 'string' || !data.coverLetterBody) {
+            throw new Error('Invalid coverLetterBody: expected non-empty string');
+        }
+
+        return data;
+    } catch (e) {
+        console.error('Failed to parse JSON:', responseText);
+        throw new Error('Failed to parse Gemini response as JSON');
+    }
+}

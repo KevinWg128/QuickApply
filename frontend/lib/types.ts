@@ -182,3 +182,18 @@ export interface PaginatedResponse<T> {
         totalPages: number;
     };
 }
+
+// Tailored Resume/Cover Letter types
+export interface TailoredContent {
+    summaryBullets: string[];     // 5 tailored bullet points
+    keySkills: string[];          // 3 key skills for title bar
+    relevantSkills: string[];     // Up to 9 relevant skills
+    coverLetterBody: string;      // Generated cover letter content
+}
+
+export interface TailoredContentResponse {
+    message: string;
+    data: TailoredContent;
+    profile: Profile;
+}
+

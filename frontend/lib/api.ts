@@ -264,3 +264,37 @@ export const jobApplicationApi = {
     delete: (id: string) =>
         fetchJobApi<void>(`/job-applications/${id}`, { method: 'DELETE' }),
 };
+
+// ============ Tailor API ============
+import type { TailoredContentResponse } from './types';
+
+export const tailorApi = {
+    generate: (jobApplication: JobApplication) =>
+        fetchResumeApi<TailoredContentResponse>('/api/tailor/generate', {
+            method: 'POST',
+            body: JSON.stringify({ jobApplication }),
+        }),
+};
+
+// Fetch wrapper for resume service (JSON)
+async function fetchResumeApi<T>(
+    endpoint: string,
+    options?: RequestInit
+): Promise<T> {
+    const url = `${RESUME_API_URL}${endpoint}`;
+    const response = await fetch(url, {
+        ...options,
+        headers: {
+            'Content-Type': 'application/json',
+            ...options?.headers,
+        },
+    });
+
+    if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        throw new Error(error.error || error.message || `API Error: ${response.status}`);
+    }
+
+    return response.json();
+}
+
