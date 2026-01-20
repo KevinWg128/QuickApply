@@ -65,13 +65,12 @@ const styles = StyleSheet.create({
     },
     // Title bar with blue line
     titleBar: {
-        marginTop: 8,
-        marginBottom: 8,
+
     },
     blueLine: {
         height: 2,
         backgroundColor: '#2563eb',
-        marginBottom: 6,
+        marginBottom: 2,
     },
     jobTitleRow: {
         flexDirection: 'row',
@@ -94,7 +93,7 @@ const styles = StyleSheet.create({
     },
     // Section styles
     section: {
-        marginBottom: 12,
+        marginBottom: 4,
     },
     sectionTitle: {
         fontSize: 11,
@@ -250,51 +249,54 @@ export function ResumeDocument({
     return (
         <Document>
             <Page size="LETTER" style={styles.page}>
-                {/* Header */}
-                <View style={styles.header}>
-                    <View style={styles.headerTop}>
-                        <Text style={styles.name}>{profile.name}</Text>
-                        <Text style={styles.contactInfo}>
-                            Toronto, Ontario | {profile.phone || ''}
-                        </Text>
+                {/* Header and Title Bar (Fixed) */}
+                <View fixed>
+                    <View style={styles.header}>
+                        <View style={styles.headerTop}>
+                            <Text style={styles.name}>{profile.name}</Text>
+                            <Text style={styles.contactInfo}>
+                                Toronto, Ontario | {profile.phone || ''}
+                            </Text>
+                        </View>
+                        <View style={styles.contactRow}>
+                            <Text>{profile.email}</Text>
+                            {profile.linkedinUrl && (
+                                <>
+                                    <Text> | </Text>
+                                    <Link src={profile.linkedinUrl} style={styles.link}>
+                                        LinkedIn
+                                    </Link>
+                                </>
+                            )}
+                            {profile.personalSiteUrl && (
+                                <>
+                                    <Text> | </Text>
+                                    <Link src={profile.personalSiteUrl} style={styles.link}>
+                                        Portfolio
+                                    </Link>
+                                </>
+                            )}
+                        </View>
                     </View>
-                    <View style={styles.contactRow}>
-                        <Text>{profile.email}</Text>
-                        {profile.linkedinUrl && (
-                            <>
-                                <Text> | </Text>
-                                <Link src={profile.linkedinUrl} style={styles.link}>
-                                    LinkedIn
-                                </Link>
-                            </>
-                        )}
-                        {profile.personalSiteUrl && (
-                            <>
-                                <Text> | </Text>
-                                <Link src={profile.personalSiteUrl} style={styles.link}>
-                                    Portfolio
-                                </Link>
-                            </>
-                        )}
+
+                    {/* Title Bar with Blue Line */}
+                    <View style={styles.titleBar}>
+                        <View style={styles.blueLine} />
                     </View>
                 </View>
 
-                {/* Title Bar with Blue Line */}
-                <View style={styles.titleBar}>
-                    <View style={styles.blueLine} />
-                    <View style={styles.jobTitleRow}>
-                        <Text style={styles.jobTitle}>{jobTitle}</Text>
-                    </View>
-                    <View style={[styles.jobTitleRow, { marginTop: 4 }]}>
-                        {keySkills.map((skill, index) => (
-                            <View key={skill} style={{ flexDirection: 'row', alignItems: 'center' }}>
-                                <Text style={styles.keySkill}>{skill}</Text>
-                                {index < keySkills.length - 1 && (
-                                    <Text style={[styles.keySkillsDivider, { marginLeft: 20 }]}>|</Text>
-                                )}
-                            </View>
-                        ))}
-                    </View>
+                <View style={styles.jobTitleRow}>
+                    <Text style={styles.jobTitle}>{jobTitle}</Text>
+                </View>
+                <View style={[styles.jobTitleRow, { marginTop: 2, marginBottom: 4 }]}>
+                    {keySkills.map((skill, index) => (
+                        <View key={skill} style={{ flexDirection: 'row', alignItems: 'center' }}>
+                            <Text style={styles.keySkill}>{skill}</Text>
+                            {index < keySkills.length - 1 && (
+                                <Text style={[styles.keySkillsDivider, { marginLeft: 20 }]}>|</Text>
+                            )}
+                        </View>
+                    ))}
                 </View>
 
                 {/* Summary Bullets */}
@@ -328,7 +330,7 @@ export function ResumeDocument({
                     <View style={styles.section}>
                         <Text style={styles.sectionTitle}>Related Work Experience</Text>
                         {workExperiences.map((exp: WorkExperience) => (
-                            <View key={exp.id} style={styles.experienceItem}>
+                            <View key={exp.id} style={styles.experienceItem} wrap={false}>
                                 <View style={styles.experienceHeader}>
                                     <Text style={styles.experienceTitle}>
                                         {exp.title} {exp.location && `(${exp.location})`}
