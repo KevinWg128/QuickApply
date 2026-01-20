@@ -13,6 +13,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { tailorApi, jobApplicationApi, profileApi } from '@/lib/api';
@@ -32,6 +33,7 @@ import {
     RefreshCw,
     Settings,
     User,
+    Plus,
 } from 'lucide-react';
 
 // Dynamic import for PDFDownloadLink to avoid SSR issues
@@ -71,6 +73,10 @@ export function TailoredResumeDialog({
     const [editedKeySkills, setEditedKeySkills] = useState<string[]>([]);
     const [editedRelevantSkills, setEditedRelevantSkills] = useState<string[]>([]);
     const [editedCoverLetter, setEditedCoverLetter] = useState('');
+
+    // Input states for adding new items
+    const [newKeySkill, setNewKeySkill] = useState('');
+    const [newTechnicalSkill, setNewTechnicalSkill] = useState('');
 
     const [activeTab, setActiveTab] = useState<'resume' | 'cover-letter'>('resume');
     const [viewMode, setViewMode] = useState<'preview' | 'edit'>('preview');
@@ -172,6 +178,31 @@ export function TailoredResumeDialog({
 
     const handleRemoveRelevantSkill = (skill: string) => {
         setEditedRelevantSkills(editedRelevantSkills.filter((s) => s !== skill));
+    };
+
+    const handleAddKeySkill = () => {
+        if (newKeySkill.trim() && editedKeySkills.length < 3) {
+            setEditedKeySkills([...editedKeySkills, newKeySkill.trim()]);
+            setNewKeySkill('');
+        }
+    };
+
+    const handleAddTechnicalSkill = () => {
+        if (newTechnicalSkill.trim() && editedRelevantSkills.length < 9) {
+            setEditedRelevantSkills([...editedRelevantSkills, newTechnicalSkill.trim()]);
+            setNewTechnicalSkill('');
+        }
+    };
+
+    const handleAddBullet = () => {
+        if (editedBullets.length < 5) {
+            setEditedBullets([...editedBullets, '']);
+        }
+    };
+
+    const handleRemoveBullet = (index: number) => {
+        const newBullets = editedBullets.filter((_, i) => i !== index);
+        setEditedBullets(newBullets);
     };
 
     const handleRegenerate = () => {
@@ -333,7 +364,7 @@ export function TailoredResumeDialog({
                                             {/* Key Skills */}
                                             <div>
                                                 <h3 className="font-semibold mb-2">Key Skills (3 for title bar)</h3>
-                                                <div className="flex flex-wrap gap-2">
+                                                <div className="flex flex-wrap gap-2 mb-3">
                                                     {editedKeySkills.map((skill) => (
                                                         <Badge key={skill} variant="secondary" className="gap-1">
                                                             {skill}
@@ -346,21 +377,59 @@ export function TailoredResumeDialog({
                                                         </Badge>
                                                     ))}
                                                 </div>
+                                                {editedKeySkills.length < 3 && (
+                                                    <div className="flex gap-2">
+                                                        <Input
+                                                            value={newKeySkill}
+                                                            onChange={(e) => setNewKeySkill(e.target.value)}
+                                                            onKeyDown={(e) => e.key === 'Enter' && handleAddKeySkill()}
+                                                            placeholder="Add a key skill..."
+                                                            className="flex-1"
+                                                        />
+                                                        <Button
+                                                            onClick={handleAddKeySkill}
+                                                            size="sm"
+                                                            disabled={!newKeySkill.trim()}
+                                                        >
+                                                            <Plus className="h-4 w-4 mr-1" />
+                                                            Add
+                                                        </Button>
+                                                    </div>
+                                                )}
                                             </div>
 
                                             {/* Summary Bullets */}
                                             <div>
-                                                <h3 className="font-semibold mb-2">Summary Bullets (5)</h3>
+                                                <div className="flex items-center justify-between mb-2">
+                                                    <h3 className="font-semibold">Summary Bullets (5)</h3>
+                                                    {editedBullets.length < 5 && (
+                                                        <Button
+                                                            onClick={handleAddBullet}
+                                                            size="sm"
+                                                            variant="outline"
+                                                        >
+                                                            <Plus className="h-4 w-4 mr-1" />
+                                                            Add Bullet
+                                                        </Button>
+                                                    )}
+                                                </div>
                                                 <div className="space-y-3">
                                                     {editedBullets.map((bullet, index) => (
-                                                        <Textarea
-                                                            key={index}
-                                                            value={bullet}
-                                                            onChange={(e) => handleBulletChange(index, e.target.value)}
-                                                            rows={2}
-                                                            className="resize-none"
-                                                            placeholder={`Bullet point ${index + 1}`}
-                                                        />
+                                                        <div key={index} className="relative">
+                                                            <Textarea
+                                                                value={bullet}
+                                                                onChange={(e) => handleBulletChange(index, e.target.value)}
+                                                                rows={2}
+                                                                className="resize-none pr-10"
+                                                                placeholder={`Bullet point ${index + 1}`}
+                                                            />
+                                                            <button
+                                                                onClick={() => handleRemoveBullet(index)}
+                                                                className="absolute top-2 right-2 text-muted-foreground hover:text-destructive"
+                                                            >
+                                                                <X className="h-4 w-4" />
+                                                            </button>
+                                                        </div>
                                                     ))}
                                                 </div>
                                             </div>
@@ -368,7 +437,7 @@ export function TailoredResumeDialog({
                                             {/* Relevant Skills */}
                                             <div>
                                                 <h3 className="font-semibold mb-2">Technical Skills (up to 9)</h3>
-                                                <div className="flex flex-wrap gap-2">
+                                                <div className="flex flex-wrap gap-2 mb-3">
                                                     {editedRelevantSkills.map((skill) => (
                                                         <Badge key={skill} variant="outline" className="gap-1">
                                                             {skill}
@@ -381,6 +450,25 @@ export function TailoredResumeDialog({
                                                         </Badge>
                                                     ))}
                                                 </div>
+                                                {editedRelevantSkills.length < 9 && (
+                                                    <div className="flex gap-2">
+                                                        <Input
+                                                            value={newTechnicalSkill}
+                                                            onChange={(e) => setNewTechnicalSkill(e.target.value)}
+                                                            onKeyDown={(e) => e.key === 'Enter' && handleAddTechnicalSkill()}
+                                                            placeholder="Add a technical skill..."
+                                                            className="flex-1"
+                                                        />
+                                                        <Button
+                                                            onClick={handleAddTechnicalSkill}
+                                                            size="sm"
+                                                            disabled={!newTechnicalSkill.trim()}
+                                                        >
+                                                            <Plus className="h-4 w-4 mr-1" />
+                                                            Add
+                                                        </Button>
+                                                    </div>
+                                                )}
                                             </div>
                                         </div>
                                     </ScrollArea>
