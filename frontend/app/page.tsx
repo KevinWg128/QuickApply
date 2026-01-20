@@ -107,10 +107,10 @@ export default function JobApplicationsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="flex min-h-screen flex-col bg-background">
       {/* Header */}
       <header className="sticky top-0 z-50 border-b bg-background/80 backdrop-blur-lg">
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
+        <div className="mx-auto flex h-16 items-center justify-between px-8 sm:px-12 lg:px-24">
           <div className="flex items-center gap-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary/60">
               <Zap className="h-5 w-5 text-primary-foreground" />
@@ -136,7 +136,7 @@ export default function JobApplicationsPage() {
       </header>
 
       {/* Main Content */}
-      <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
+      <main className="flex-1 px-8 py-8 sm:px-12 lg:px-24">
         {profile && (
           <div className="mb-6 rounded-lg border bg-card p-4">
             <p className="text-sm text-muted-foreground">
@@ -158,7 +158,7 @@ export default function JobApplicationsPage() {
 
       {/* Footer */}
       <footer className="border-t bg-muted/30">
-        <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6">
+        <div className="px-8 py-6 sm:px-12 lg:px-24">
           <p className="text-center text-xs text-muted-foreground">
             Quick Apply © {new Date().getFullYear()} — Your job search, simplified.
           </p>

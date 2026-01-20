@@ -197,7 +197,7 @@ export default function Dashboard() {
       {/* Header */}
       <header className="sticky top-0 z-50 border-b bg-background/80 backdrop-blur-lg">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
-          <div className="flex items-center gap-3">
+          <Link href="/" className="flex items-center gap-3 transition-opacity hover:opacity-80">
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary/60">
               <Zap className="h-5 w-5 text-primary-foreground" />
             </div>
@@ -205,7 +205,7 @@ export default function Dashboard() {
               <h1 className="text-lg font-bold tracking-tight">Quick Apply</h1>
               <p className="text-xs text-muted-foreground">Resume Manager</p>
             </div>
-          </div>
+          </Link>
           <div className="flex items-center gap-2">
             <Button
               variant="ghost"
