@@ -218,7 +218,7 @@ interface ResumeDocumentProps {
 function formatDate(dateStr: string | null | undefined): string {
     if (!dateStr) return 'Present';
     const date = new Date(dateStr);
-    return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+    return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric', timeZone: 'UTC' });
 }
 
 // Helper to format URLs for display (strip protocol)

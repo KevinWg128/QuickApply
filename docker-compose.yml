@@ -83,6 +83,31 @@ services:
       - quickapply-network
     command: pnpm run dev
 
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: development
+    container_name: quickapply-frontend
+    environment:
+      NODE_ENV: development
+      NEXT_PUBLIC_API_URL: http://localhost:3001
+      NEXT_PUBLIC_RESUME_API_URL: http://localhost:3004
+      NEXT_PUBLIC_JOB_API_URL: http://localhost:3005
+    ports:
+      - "3002:3002"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
+    depends_on:
+      - profile-service
+      - resume-service
+      - job-service
+    networks:
+      - quickapply-network
+    command: pnpm run dev
+
 volumes:
   postgres_data:
 

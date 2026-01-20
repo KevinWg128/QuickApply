@@ -26,7 +26,7 @@ interface ProjectCardProps {
 
 function formatDate(dateString: string): string {
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+    return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric', timeZone: 'UTC' });
 }
 
 export function ProjectCard({ project, onUpdate, onDelete }: ProjectCardProps) {
