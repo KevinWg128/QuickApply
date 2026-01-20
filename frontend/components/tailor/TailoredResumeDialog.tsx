@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, ReactNode } from 'react';
+import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import {
     Dialog,
@@ -29,6 +30,8 @@ import {
     X,
     Mail,
     RefreshCw,
+    Settings,
+    User,
 } from 'lucide-react';
 
 // Dynamic import for PDFDownloadLink to avoid SSR issues
@@ -56,6 +59,7 @@ export function TailoredResumeDialog({
     application,
     trigger,
 }: TailoredResumeDialogProps) {
+    const router = useRouter();
     const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -71,10 +75,33 @@ export function TailoredResumeDialog({
     const [activeTab, setActiveTab] = useState<'resume' | 'cover-letter'>('resume');
     const [viewMode, setViewMode] = useState<'preview' | 'edit'>('preview');
 
+    // Error types for better user guidance
+    type ValidationErrorType = 'no_profile' | 'no_api_key' | 'general';
+    const [errorType, setErrorType] = useState<ValidationErrorType>('general');
+
     const generateContent = useCallback(async () => {
         setLoading(true);
         setError(null);
+        setErrorType('general');
+
         try {
+            // Pre-validate: Check if profile exists and has Gemini API key
+            const existingProfile = await profileApi.get();
+
+            if (!existingProfile) {
+                setErrorType('no_profile');
+                setError('Please create your profile first before tailoring your resume.');
+                setLoading(false);
+                return;
+            }
+
+            if (!existingProfile.geminiApiKey) {
+                setErrorType('no_api_key');
+                setError('Please enter your Gemini API key in Settings before tailoring your resume.');
+                setLoading(false);
+                return;
+            }
+
             const response = await tailorApi.generate(application);
             setProfile(response.profile);
             setContent(response.data);
@@ -93,7 +120,14 @@ export function TailoredResumeDialog({
 
         } catch (err: any) {
             console.error('Error generating tailored content:', err);
-            setError(err.message || 'Failed to generate tailored content');
+            // Check for specific error messages from backend
+            const errorMessage = err.message || 'Failed to generate tailored content';
+            if (errorMessage.includes('Profile not found') || errorMessage.includes('create a profile')) {
+                setErrorType('no_profile');
+            } else if (errorMessage.includes('API Key') || errorMessage.includes('Gemini')) {
+                setErrorType('no_api_key');
+            }
+            setError(errorMessage);
         } finally {
             setLoading(false);
         }
@@ -176,11 +210,37 @@ export function TailoredResumeDialog({
 
                 {error && (
                     <div className="flex-1 flex flex-col items-center justify-center gap-4">
-                        <p className="text-destructive">{error}</p>
-                        <Button onClick={handleRegenerate} variant="outline">
-                            <RefreshCw className="h-4 w-4 mr-2" />
-                            Try Again
-                        </Button>
+                        <p className="text-destructive text-center max-w-md">{error}</p>
+                        <div className="flex gap-2">
+                            {errorType === 'no_profile' && (
+                                <Button
+                                    onClick={() => {
+                                        setOpen(false);
+                                        router.push('/profile');
+                                    }}
+                                >
+                                    <User className="h-4 w-4 mr-2" />
+                                    Create Profile
+                                </Button>
+                            )}
+                            {errorType === 'no_api_key' && (
+                                <Button
+                                    onClick={() => {
+                                        setOpen(false);
+                                        router.push('/settings');
+                                    }}
+                                >
+                                    <Settings className="h-4 w-4 mr-2" />
+                                    Go to Settings
+                                </Button>
+                            )}
+                            {errorType === 'general' && (
+                                <Button onClick={handleRegenerate} variant="outline">
+                                    <RefreshCw className="h-4 w-4 mr-2" />
+                                    Try Again
+                                </Button>
+                            )}
+                        </div>
                     </div>
                 )}
 
