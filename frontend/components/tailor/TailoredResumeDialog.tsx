@@ -14,7 +14,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { tailorApi } from '@/lib/api';
+import { tailorApi, jobApplicationApi, profileApi } from '@/lib/api';
 import type {
     JobApplication,
     Profile,
@@ -83,7 +83,14 @@ export function TailoredResumeDialog({
             setEditedBullets(response.data.summaryBullets);
             setEditedKeySkills(response.data.keySkills);
             setEditedRelevantSkills(response.data.relevantSkills);
+            setEditedRelevantSkills(response.data.relevantSkills);
             setEditedCoverLetter(response.data.coverLetterBody);
+
+            // Save the generated content to the database
+            await jobApplicationApi.update(application.id, {
+                tailoredResume: response.data,
+            });
+
         } catch (err: any) {
             console.error('Error generating tailored content:', err);
             setError(err.message || 'Failed to generate tailored content');
@@ -94,9 +101,30 @@ export function TailoredResumeDialog({
 
     useEffect(() => {
         if (open && !content && !loading) {
-            generateContent();
+            if (application.tailoredResume) {
+                setLoading(true);
+                profileApi.get()
+                    .then((p: Profile | null) => {
+                        if (p) {
+                            setProfile(p);
+                            const saved = application.tailoredResume!;
+                            setContent(saved);
+                            setEditedBullets(saved.summaryBullets);
+                            setEditedKeySkills(saved.keySkills);
+                            setEditedRelevantSkills(saved.relevantSkills);
+                            setEditedCoverLetter(saved.coverLetterBody);
+                        }
+                    })
+                    .catch((err: any) => {
+                        console.error('Error loading profile:', err);
+                        setError('Failed to load profile');
+                    })
+                    .finally(() => setLoading(false));
+            } else {
+                generateContent();
+            }
         }
-    }, [open, content, loading, generateContent]);
+    }, [open, content, loading, generateContent, application.tailoredResume]);
 
     const handleBulletChange = (index: number, value: string) => {
         const newBullets = [...editedBullets];

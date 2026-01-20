@@ -26,6 +26,7 @@ model JobApplication {
   appliedAt      DateTime          @default(now()) @map("applied_at")
   createdAt      DateTime          @default(now()) @map("created_at")
   updatedAt      DateTime          @updatedAt @map("updated_at")
+  tailoredResume Json?             @map("tailored_resume")
 
   @@map("job_applications")
 }

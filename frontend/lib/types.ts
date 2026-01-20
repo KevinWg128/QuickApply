@@ -162,6 +162,7 @@ export interface JobApplication {
     appliedAt: string;
     createdAt: string;
     updatedAt: string;
+    tailoredResume?: TailoredContent | null;
 }
 
 export interface JobApplicationInput {
@@ -171,6 +172,7 @@ export interface JobApplicationInput {
     jobDescription?: string | null;
     notes?: string | null;
     appliedAt?: string;
+    tailoredResume?: TailoredContent | null;
 }
 
 export interface PaginatedResponse<T> {

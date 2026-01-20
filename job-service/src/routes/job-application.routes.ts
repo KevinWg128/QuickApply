@@ -99,6 +99,7 @@ router.put('/:id', async (req, res) => {
             notes,
             status,
             appliedAt: appliedAt ? new Date(appliedAt) : undefined,
+            tailoredResume: req.body.tailoredResume,
         },
     });
 
